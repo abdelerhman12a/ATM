@@ -1,0 +1,143 @@
+// C++ code
+//
+#include <Servo.h> 
+ 
+          
+int angle = 0;     
+////////////////////// 
+//These values are in the datasheet 
+#define RT0 10000  // Ω 
+#define B 3977  
+#define an A1 
+#define lk 13; 
+float value=0; 
+unsigned long res=0;  
+int ldrPin = A1;  
+int rp = 12; 
+int hp = 10; 
+int led = 8; 
+Servo servo_test; 
+ 
+ 
+//-------------------------------------- 
+  
+  
+#define VCC 5    //Supply voltage 
+#define R 8600  //R=10KΩ 
+  
+//Variables 
+float RT, VR, ln, TX, T0, VRT; 
+ 
+double TX1, TX2; 
+int ldrpin = A1; 
+void setup() { 
+  Serial.begin(9600); 
+  T0 = 25 + 273.15;                 //Temperature T0 from datasheet, conversion from Celsius to kelvin 
+  pinMode(rp, OUTPUT); 
+  pinMode(hp, OUTPUT); 
+  pinMode(ldrpin, INPUT); 
+  pinMode (led, OUTPUT ); 
+  servo_test.attach(11);    // attach the signal pin of servo to pin9 of arduino 
+  // Set the relay pin as an output 
+ 
+ 
+  // Start the serial communication 
+  Serial.begin(9600); 
+} 
+  
+void loop() { 
+  VRT = analogRead(A0);              //Acquisition analog value of VRT 
+  VRT = (5.00 / 1023.00) * VRT;      //Conversion to voltage 
+  VR = VCC - VRT; 
+  RT = VRT / (VR / R);               //Resistance of RT 
+  
+  ln = log(RT / RT0); 
+  TX = (1 / ((ln / B) + (1 / T0))); //Temperature from thermistor 
+  TX = TX - 273.15;                 //Conversion to Celsius 
+  delay(50); 
+  VRT = analogRead(A0);              //Acquisition analog value of VRT 
+  VRT = (5.00 / 1023.00) * VRT;      //Conversion to voltage 
+  VR = VCC - VRT; 
+  RT = VRT / (VR / R);               //Resistance of RT 
+  
+  ln = log(RT / RT0); 
+  TX1 = (1 / ((ln / B) + (1 / T0))); //Temperature from thermistor 
+  TX1 = TX1 - 273.15;                 //Conversion to Celsius 
+  delay(50); 
+ VRT = analogRead(A0);              //Acquisition analog value of VRT 
+  VRT = (5.00 / 1023.00) * VRT;      //Conversion to voltage 
+  VR = VCC - VRT; 
+  RT = VRT / (VR / R);               //Resistance of RT 
+  
+  ln = log(RT / RT0); 
+  TX2 = (1 / ((ln / B) + (1 / T0))); //Temperature from thermistor 
+  TX2 = TX2 - 273.15;                 //Conversion to Celsius 
+  delay(50);   
+ double ft = (TX + TX1 + TX2 ) / 3; 
+  Serial.print("Temperature:"); 
+  Serial.print("\t"); 
+  Serial.print(ft); 
+  Serial.print("C\t\t"); 
+  Serial.print(ft + 273.15);        //Conversion to Kelvin 
+  Serial.print("K\t\t"); 
+  Serial.print((ft * 1.8) + 32);    //Conversion to Fahrenheit 
+  Serial.print("F"); 
+   
+  if (ft < 26) 
+  { 
+    delay(300); 
+  if(ft < 26) 
+{    
+    digitalWrite(rp, LOW); 
+    digitalWrite(hp, HIGH); 
+} 
+  } 
+  else if  (ft > 26 , ft <28) 
+ { 
+   delay(300); 
+  if(ft > 26, ft <28)  
+  {      
+   digitalWrite(rp, HIGH); 
+   digitalWrite(hp, HIGH); 
+  } 
+ }   
+else if(ft > 28) 
+{ 
+     delay(300); 
+    if(ft > 28) 
+    {         
+     digitalWrite(rp, HIGH); 
+     digitalWrite(hp, LOW); 
+    } 
+} 
+  delay(500); 
+ 
+ 
+// Define the pins for the LDR and the relay module 
+ int ldrValue = 1023-analogRead(A1) ; 
+ 
+  // Print the LDR value to the serial monitor 
+  Serial.print("      LDR value: "); 
+  Serial.println(ldrValue ); 
+ 
+  // If the LDR value is below a certain threshold, turn on the lamp 
+  if ( ldrValue >= 323) {  
+      
+digitalWrite(led, 0); 
+ }     
+ else if(ldrValue < 323) 
+{ 
+digitalWrite(led, 1); 
+   
+}   
+ 
+ 
+  if(ft>= 28){ 
+ 
+servo_test.write(0); 
+ 
+    } 
+  if(ft< 28){ 
+ servo_test.write(50); 
+  } 
+}
